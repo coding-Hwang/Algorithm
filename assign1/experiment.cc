@@ -7,6 +7,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "convention_algorithm.h" // Include the header file for sorting algorithms
+
 using namespace std;
 using namespace chrono;
 
@@ -121,8 +123,25 @@ int main() {
         merge_sort(a, 0, a.size() - 1);
     }, generate_random, "Random", sizes, out);
 
-    // 나머지 알고리즘도 동일하게 추가
+    run_experiment("MergeSort", [](vector<int>& a) {
+        merge_sort(a, 0, a.size() - 1);
+    }, generate_reverse, "Reverse", sizes, out);
+
+    run_experiment("MergeSort", [](vector<int>& a) {
+        merge_sort(a, 0, a.size() - 1);
+    }, generate_partial, "Partial", sizes, out);
 
     out.close();
     return 0;
 }
+
+// void run_experiment(const string& name, void(*sort_func)(vector<int>&),
+//                     vector<Element> (*data_gen)(int),
+//                     const string& input_type, const vector<int>& sizes, ofstream& out)
+
+// void merge_sort(vector<int>& arr, int left, int right); 
+// void heap_sort(vector<int>& arr);
+// void bubble_sort(vector<int>& arr);
+// void insertion_sort(vector<int>& arr);
+// void selection_sort(vector<int>& arr);
+// void quick_sort(vector<int>& arr, int low, int high);
