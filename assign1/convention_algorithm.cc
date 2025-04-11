@@ -81,12 +81,11 @@ void bubble_sort(vector<int>& arr) {
 }
 
 /* 4. Insertion Sort */
-void insertion_sort(vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 1; i < n; i++) {
+void insertion_sort(vector<int>& arr, int left, int right) {
+    for (int i = left + 1; i <= right; i++) {
         int key = arr[i];
         int j = i - 1;
-        while (j >= 0 && arr[j] > key) {
+        while (j >= left && arr[j] > key) {
             arr[j + 1] = arr[j];
             j--;
         }
@@ -134,13 +133,13 @@ void quick_sort(vector<int>& arr, int low, int high) {
 // 전체 코드 훑고, 수도 코드 기반 알고리즘 정확히 이해
 // testing 진행
 
-// for test
-int main(){
-    vector<int> arr = {38, 27, 43, 3, 9, 82, 10};
-    int n = arr.size();
-    merge_sort(arr, 0, n - 1);
-    for (int i = 0; i < n; i++) {
-        cout << arr[i] << " ";
-    }
-    return 0;
-}
+// // for test
+// int main(){
+//     vector<int> arr = {38, 27, 43, 3, 9, 82, 10};
+//     int n = arr.size();
+//     merge_sort(arr, 0, n - 1);
+//     for (int i = 0; i < n; i++) {
+//         cout << arr[i] << " ";
+//     }
+//     return 0;
+// }

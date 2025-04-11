@@ -78,7 +78,10 @@ void run_experiment(const string& name, void(*sort_func)(vector<int>&),
                     vector<Element> (*data_gen)(int),
                     const string& input_type, const vector<int>& sizes, ofstream& out) {
     for (int size : sizes) {
+        cout << "▶ [" << name << "] " << input_type << ", size=" << size << " ... running..." << endl;
+
         double total_time = 0.0;
+        vector<double> trial_times;
         bool stable = true;
 
         for (int t = 0; t < 10; ++t) {
@@ -91,13 +94,16 @@ void run_experiment(const string& name, void(*sort_func)(vector<int>&),
             auto start = high_resolution_clock::now();
             sort_func(raw_data);
             auto end = high_resolution_clock::now();
-            total_time += duration<double, milli>(end - start).count();
+            double elapsed = duration<double, milli>(end - start).count();
+
+            trial_times.push_back(elapsed);
+            total_time += elapsed;
 
             for (int i = 0; i < size; ++i)
                 data[i].first = raw_data[i];
 
             if (!is_sorted(data)) {
-                cerr << "Sort failed: " << name << ", Size: " << size << endl;
+                cerr << "❌ Sort failed: " << name << ", Size: " << size << endl;
                 return;
             }
 
@@ -105,15 +111,30 @@ void run_experiment(const string& name, void(*sort_func)(vector<int>&),
                 stable = false;
         }
 
-        out << name << "," << input_type << "," << size << "," << (total_time / 10.0) << "," << (stable ? "Yes" : "No") << "\n";
+        double avg_time = total_time / 10.0;
+
+        // 결과 출력 (기본 정보 + 평균 + 개별 실험 결과 + 안정성 여부)
+        out << name << "," << input_type << "," << size << "," << avg_time;
+        for (auto t : trial_times)
+            out << "," << t;
+        out << "," << (stable ? "Yes" : "No") << "\n";
+
+        cout << "✅ Finished: " << name << " with " << input_type << ", size=" << size << endl;
     }
 }
 
 int main() {
     ofstream out("experiment_results.csv");
-    out << "Algorithm,InputType,Size,Time(ms),Stable\n";
+    out << "Algorithm,InputType,Size,Time(ms)";
+    for (int i = 1; i <= 10; ++i)
+        out << ",Trial" << i;
+    out << ",Stable\n";
 
     vector<int> sizes = {1000, 10000, 100000};
+
+    // run_experiment("HeapSort", [](vector<int>& a) {
+    //     merge_sort(a, 0, a.size() - 1);
+    // }, generate_sorted, "Sorted", sizes, out);
 
     run_experiment("MergeSort", [](vector<int>& a) {
         merge_sort(a, 0, a.size() - 1);
