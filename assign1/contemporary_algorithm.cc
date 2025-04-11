@@ -13,7 +13,7 @@ void rebalance(vector<int>& S, int size) {
     vector<int> newS(S.size(), -1); // S.size = 2*n
     int j = 1; // 홀수 인덱스에만 원소 삽입
     int m = 0;
-    for (int i = 0; i < S.size(); ++i) {
+    for (size_t i = 0; i < S.size(); ++i) {
         if (S[i] != -1) {
             newS[j] = S[i];
             j += 2; // gap을 한 칸씩 확보
@@ -36,7 +36,6 @@ int BinarySearch(int key, const vector<int>& S, int length) {
         else
             left = mid + 1;
     }
-    cout<< "binary search:" <<left << "for" << key <<endl;
     return left;
 }
 
@@ -85,7 +84,7 @@ void LibrarySort(vector<int>& arr, int& re_num) {
     }
 
     arr.clear();
-    for (int i = 0; i < S.size(); ++i) {
+    for (size_t i = 0; i < S.size(); ++i) {
         if (S[i] != -1) {
             arr.push_back(S[i]);
         }
@@ -167,7 +166,7 @@ void CombSort(vector<int>& arr) {
         gap = max(1, int(floor(gap / shrink))); // gap = n/(1.3)^k (k = # of pass)
         swapped = false;
 
-        for (int i = 0; i + gap < arr.size(); ++i) {
+        for (size_t i = 0; i + gap < arr.size(); ++i) {
             if (arr[i] > arr[i + gap]) {
                 swap(arr[i], arr[i + gap]);
                 swapped = true;
@@ -193,7 +192,7 @@ void buildTree(vector<int>& tree, const vector<int>& data, int leafStart){
         tree[leafStart + i] = data[i];
     }
 
-    for (int i = leafStart + n; i < tree.size(); ++i){
+    for (size_t i = leafStart + n; i < tree.size(); ++i){
         tree[i] = INT_MAX; // leaf가 아닌 노드는 INT_MAX로 초기화
     }
 
@@ -275,33 +274,28 @@ void Introsort(vector<int>& arr){
 
 /* for test */
 
-int main() {
-    vector<int> arr = {9, 3, 7, 1, 4, 8, 2, 5, 6, 0, 10, 12, 11, 13,
-        14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
-        27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
-        39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-        51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
-        63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74,};
+// int main() {
+//     vector<int> arr = {1, 6, 74, 3, 46, 252, 416, 7, 198, 329};
 
-    cout << "Original: ";
-    for (int n : arr) cout << n << " ";
-    cout << "\n";
+//     cout << "Original: ";
+//     for (int n : arr) cout << n << " ";
+//     cout << "\n";
 
-    int renum = 0;
-    LibrarySort(arr, renum); // 문제 있음
-    // TimSort(arr);
-    // cocktail_shaker_sort(arr);
-    // CombSort(arr);
-    // TournamentSort(arr);
-    // Introsort(arr);
+//     int renum = 0;
+//     LibrarySort(arr, renum); // 문제 있음
+//     // TimSort(arr);
+//     // cocktail_shaker_sort(arr);
+//     // CombSort(arr);
+//     // TournamentSort(arr);
+//     // Introsort(arr);
 
 
-    cout << "Sorted:   ";
-    for (int n : arr) cout << n << " ";
-    cout << "\n";
+//     cout << "Sorted:   ";
+//     for (int n : arr) cout << n << " ";
+//     cout << "\n";
 
-    cout << "Rebalance count: " << renum << endl;
-    cout << "Array size: " << arr.size() << endl;
+//     cout << "Rebalance count: " << renum << endl;
+//     cout << "Array size: " << arr.size() << endl;
 
-    return 0;
-}
+//     return 0;
+// }
