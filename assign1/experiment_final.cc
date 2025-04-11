@@ -6,23 +6,32 @@
 #include <algorithm>
 #include <string>
 #include <unordered_map>
+#include <queue>
+#include <sys/resource.h>
 
-#include "convention_algorithm.h" // Include the header file for sorting algorithms
+#include "convention_algorithm.h"
 
 using namespace std;
 using namespace chrono;
 
 typedef pair<int, int> Element; // {key, id}
 
-// --- 구현된 알고리즘 선언 ---
+long get_memory_usage_kb() {
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss; // in KB
+}
+
+
+// Sorting algorithm declarations
 void merge_sort(vector<int>& arr, int left, int right); 
 void heap_sort(vector<int>& arr);
 void bubble_sort(vector<int>& arr);
-void insertion_sort(vector<int>& arr);
+void insertion_sort(vector<int>& arr, int left, int right);
 void selection_sort(vector<int>& arr);
 void quick_sort(vector<int>& arr, int low, int high);
 
-// --- 입력 데이터 생성 ---
+// Data generation functions
 vector<Element> generate_sorted(int size) {
     vector<Element> data(size);
     for (int i = 0; i < size; ++i)
@@ -56,7 +65,7 @@ vector<Element> generate_partial(int size) {
     return data;
 }
 
-// --- 안정성 체크 ---
+// Stability checker
 bool is_stable(const vector<Element>& before, const vector<Element>& after) {
     unordered_map<int, vector<int>> bmap, amap;
     for (auto& [key, id] : before) bmap[key].push_back(id);
@@ -64,16 +73,15 @@ bool is_stable(const vector<Element>& before, const vector<Element>& after) {
     return bmap == amap;
 }
 
-// --- 정렬 확인 ---
+// Sorting correctness checker
 bool is_sorted(const vector<Element>& data) {
-    for (size_t i = 1; i < data.size(); ++i) {
+    for (size_t i = 1; i < data.size(); ++i)
         if (data[i - 1].first > data[i].first)
             return false;
-    }
     return true;
 }
 
-// --- 실험 실행 ---
+// Experiment runner
 void run_experiment(const string& name, void(*sort_func)(vector<int>&),
                     vector<Element> (*data_gen)(int),
                     const string& input_type, const vector<int>& sizes, ofstream& out) {
@@ -87,41 +95,45 @@ void run_experiment(const string& name, void(*sort_func)(vector<int>&),
         for (int t = 0; t < 10; ++t) {
             vector<Element> data = data_gen(size);
             vector<Element> original = data;
+
             vector<int> raw_data(size);
             for (int i = 0; i < size; ++i)
                 raw_data[i] = data[i].first;
 
-            auto start = high_resolution_clock::now();
+            auto mem_before = get_memory_usage_kb();
+auto start = high_resolution_clock::now();
             sort_func(raw_data);
             auto end = high_resolution_clock::now();
+auto mem_after = get_memory_usage_kb();
+long mem_used = mem_after - mem_before;
             double elapsed = duration<double, milli>(end - start).count();
-
             trial_times.push_back(elapsed);
+            cout << "  - Trial " << t+1 << ": time = " << elapsed << " ms, memory = " << mem_used << " KB" << endl;
             total_time += elapsed;
 
-            for (int i = 0; i < size; ++i)
-                data[i].first = raw_data[i];
+            // Reconstruct sorted Element array
+            unordered_map<int, queue<int>> key_to_ids;
+            for (auto& [key, id] : original)
+                key_to_ids[key].push(id);
 
-            if (!is_sorted(data)) {
-                cerr << "❌ Sort failed: " << name << ", Size: " << size << endl;
-                return;
+            vector<Element> after(size);
+            for (int i = 0; i < size; ++i) {
+                int key = raw_data[i];
+                int id = key_to_ids[key].front();
+                key_to_ids[key].pop();
+                after[i] = {key, id};
             }
 
-            if (!is_stable(original, data))
-                stable = false;
+            stable &= is_stable(original, after);
         }
 
-        double avg_time = total_time / 10.0;
-
-        // 결과 출력 (기본 정보 + 평균 + 개별 실험 결과 + 안정성 여부)
-        out << name << "," << input_type << "," << size << "," << avg_time;
-        for (auto t : trial_times)
+        out << name << "," << input_type << "," << size << "," << total_time / 10;
+        for (double t : trial_times)
             out << "," << t;
-        out << "," << (stable ? "Yes" : "No") << "\n";
-
-        cout << "✅ Finished: " << name << " with " << input_type << ", size=" << size << endl;
+        out << "," << (stable ? "Yes" : "No") << endl;
     }
 }
+
 
 int main() {
     ofstream out("experiment_results.csv");
@@ -136,33 +148,24 @@ int main() {
     //     merge_sort(a, 0, a.size() - 1);
     // }, generate_sorted, "Sorted", sizes, out);
 
-    run_experiment("HeapSort", [](vector<int>& a) {
-        heap_sort(a);
+    run_experiment("quick_sort", [](vector<int>& a) {
+        quick_sort(a, 0, a.size() - 1);
     }, generate_sorted, "Sorted", sizes, out);
 
-    run_experiment("HeapSort", [](vector<int>& a) {
-        heap_sort(a);
+    run_experiment("quick_sort", [](vector<int>& a) {
+        quick_sort(a, 0, a.size() - 1);
     }, generate_random, "Random", sizes, out);
 
-    run_experiment("HeapSort", [](vector<int>& a) {
-        heap_sort(a);
+    run_experiment("quick_sort", [](vector<int>& a) {
+        quick_sort(a, 0, a.size() - 1);
     }, generate_reverse, "Reverse", sizes, out);
 
-    run_experiment("HeapSort", [](vector<int>& a) {
-        heap_sort(a);
+    run_experiment("quick_sort", [](vector<int>& a) {
+        quick_sort(a, 0, a.size() - 1);
     }, generate_partial, "Partial", sizes, out);
 
     out.close();
     return 0;
 }
 
-// void run_experiment(const string& name, void(*sort_func)(vector<int>&),
-//                     vector<Element> (*data_gen)(int),
-//                     const string& input_type, const vector<int>& sizes, ofstream& out)
-
-// void merge_sort(vector<int>& arr, int left, int right); 
-// void heap_sort(vector<int>& arr);
-// void bubble_sort(vector<int>& arr);
-// void insertion_sort(vector<int>& arr);
-// void selection_sort(vector<int>& arr);
 // void quick_sort(vector<int>& arr, int low, int high);

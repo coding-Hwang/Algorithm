@@ -15,6 +15,20 @@ using namespace chrono;
 
 typedef pair<int, int> Element; // {key, id}
 
+long get_vm_rss_kb() {
+    std::ifstream status("/proc/self/status");
+    std::string line;
+    while (std::getline(status, line)) {
+        if (line.substr(0, 6) == "VmRSS:") {
+            long kb;
+            sscanf(line.c_str(), "VmRSS: %ld kB", &kb);
+            return kb;
+        }
+    }
+    return 0;
+}
+
+
 // Sorting algorithm declarations
 void merge_sort(vector<int>& arr, int left, int right); 
 void heap_sort(vector<int>& arr);
@@ -136,22 +150,24 @@ int main() {
     //     merge_sort(a, 0, a.size() - 1);
     // }, generate_sorted, "Sorted", sizes, out);
 
-    run_experiment("MergeSort", [](vector<int>& a) {
-        merge_sort(a, 0, a.size() - 1);
+    run_experiment("quick_sort", [](vector<int>& a) {
+        quick_sort(a, 0, a.size() - 1);
     }, generate_sorted, "Sorted", sizes, out);
 
-    run_experiment("MergeSort", [](vector<int>& a) {
-        merge_sort(a, 0, a.size() - 1);
+    run_experiment("quick_sort", [](vector<int>& a) {
+        quick_sort(a, 0, a.size() - 1);
     }, generate_random, "Random", sizes, out);
 
-    run_experiment("MergeSort", [](vector<int>& a) {
-        merge_sort(a, 0, a.size() - 1);
+    run_experiment("quick_sort", [](vector<int>& a) {
+        quick_sort(a, 0, a.size() - 1);
     }, generate_reverse, "Reverse", sizes, out);
 
-    run_experiment("MergeSort", [](vector<int>& a) {
-        merge_sort(a, 0, a.size() - 1);
+    run_experiment("quick_sort", [](vector<int>& a) {
+        quick_sort(a, 0, a.size() - 1);
     }, generate_partial, "Partial", sizes, out);
 
     out.close();
     return 0;
 }
+
+// void quick_sort(vector<int>& arr, int low, int high);
