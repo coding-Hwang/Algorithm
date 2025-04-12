@@ -7,35 +7,37 @@
 #include <string>
 #include <unordered_map>
 #include <queue>
+#include <functional>
+#include <sys/resource.h>
 
 #include "convention_algorithm.h"
+#include "contemporary_algorithm.h"
 
 using namespace std;
 using namespace chrono;
 
 typedef pair<int, int> Element; // {key, id}
 
-long get_vm_rss_kb() {
-    std::ifstream status("/proc/self/status");
-    std::string line;
-    while (std::getline(status, line)) {
-        if (line.substr(0, 6) == "VmRSS:") {
-            long kb;
-            sscanf(line.c_str(), "VmRSS: %ld kB", &kb);
-            return kb;
-        }
-    }
-    return 0;
+long get_memory_usage_kb() {
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss; // in KB
 }
 
-
 // Sorting algorithm declarations
-void merge_sort(vector<int>& arr, int left, int right); 
+void merge_sort(vector<int>& arr, int left, int right);
 void heap_sort(vector<int>& arr);
 void bubble_sort(vector<int>& arr);
 void insertion_sort(vector<int>& arr, int left, int right);
 void selection_sort(vector<int>& arr);
 void quick_sort(vector<int>& arr, int low, int high);
+
+void LibrarySort(vector<int>& arr, int& re_num);
+void TimSort(vector<int>& arr);
+void cocktail_shaker_sort(vector<int>& arr);
+void CombSort(vector<int>& arr);
+void TournamentSort(vector<int>& data);
+void Introsort(vector<int>& arr);
 
 // Data generation functions
 vector<Element> generate_sorted(int size) {
@@ -88,7 +90,7 @@ bool is_sorted(const vector<Element>& data) {
 }
 
 // Experiment runner
-void run_experiment(const string& name, void(*sort_func)(vector<int>&),
+void run_experiment(const string& name, function<void(vector<int>&)> sort_func, //void(*sort_func)(vector<int>&),
                     vector<Element> (*data_gen)(int),
                     const string& input_type, const vector<int>& sizes, ofstream& out) {
     for (int size : sizes) {
@@ -96,6 +98,7 @@ void run_experiment(const string& name, void(*sort_func)(vector<int>&),
 
         double total_time = 0.0;
         vector<double> trial_times;
+        vector<long> memory_usages;
         bool stable = true;
 
         for (int t = 0; t < 10; ++t) {
@@ -109,11 +112,15 @@ void run_experiment(const string& name, void(*sort_func)(vector<int>&),
             auto start = high_resolution_clock::now();
             sort_func(raw_data);
             auto end = high_resolution_clock::now();
+
+            long mem_after = get_memory_usage_kb();
+            memory_usages.push_back(mem_after);
+
             double elapsed = duration<double, milli>(end - start).count();
             trial_times.push_back(elapsed);
+            cout << "  - Trial " << t + 1 << ": time = " << elapsed << " ms, memory = " << mem_after << " KB" << endl;
             total_time += elapsed;
 
-            // Reconstruct sorted Element array
             unordered_map<int, queue<int>> key_to_ids;
             for (auto& [key, id] : original)
                 key_to_ids[key].push(id);
@@ -129,7 +136,13 @@ void run_experiment(const string& name, void(*sort_func)(vector<int>&),
             stable &= is_stable(original, after);
         }
 
-        out << name << "," << input_type << "," << size << "," << total_time / 10;
+        // 평균 메모리 사용량 계산
+        long avg_mem = memory_usages[9] ; // 마지막 trial의 메모리 사용량을 평균으로 사용
+
+
+
+        // 결과 출력
+        out << name << "," << input_type << "," << size << "," << avg_mem << "," << total_time / 10;
         for (double t : trial_times)
             out << "," << t;
         out << "," << (stable ? "Yes" : "No") << endl;
@@ -137,37 +150,83 @@ void run_experiment(const string& name, void(*sort_func)(vector<int>&),
 }
 
 
-int main() {
-    ofstream out("experiment_results.csv");
-    out << "Algorithm,InputType,Size,Time(ms)";
-    for (int i = 1; i <= 10; ++i)
-        out << ",Trial" << i;
-    out << ",Stable\n";
+
+
+int main(int argc, char* argv[]) {
+    if (argc < 3) {
+        cerr << "Usage: ./experiment [algorithm_name] [input_type]" << endl;
+        return 1;
+    }
+
+    string algo = argv[1]; // "merge_sort", "quick_sort", etc.
+    string input_type = argv[2]; // "sorted", "random", etc.
 
     vector<int> sizes = {1000, 10000, 100000};
+    string filename = algo + ".csv";
 
-    // run_experiment("HeapSort", [](vector<int>& a) {
-    //     merge_sort(a, 0, a.size() - 1);
-    // }, generate_sorted, "Sorted", sizes, out);
+    // 헤더가 없는 경우에만 쓰기
+    ifstream check(filename);
+    bool file_exists = check.good();
+    check.close();
 
-    run_experiment("quick_sort", [](vector<int>& a) {
-        quick_sort(a, 0, a.size() - 1);
-    }, generate_sorted, "Sorted", sizes, out);
+    ofstream out(filename, ios::app);
+    if (!file_exists) {
+        out << "Algorithm,InputType,Size,Memory(KB),Time(ms)";
+        for (int i = 1; i <= 10; ++i)
+            out << ",Trial" << i;
+        out << ",Stable\n";
+    }
 
-    run_experiment("quick_sort", [](vector<int>& a) {
-        quick_sort(a, 0, a.size() - 1);
-    }, generate_random, "Random", sizes, out);
+    // sort function 선택
+    auto sort_func = [&](vector<int>& arr) {
+        if (algo == "merge_sort") {
+            merge_sort(arr, 0, arr.size() - 1);
+        } else if (algo == "quick_sort") {
+            quick_sort(arr, 0, arr.size() - 1);
+        } else if (algo == "heap_sort") {
+            heap_sort(arr);
+        } else if (algo == "bubble_sort") {
+            bubble_sort(arr);
+        } else if (algo == "insertion_sort") {
+            insertion_sort(arr, 0, arr.size() - 1);
+        } else if (algo == "selection_sort") {
+            selection_sort(arr);
+        } 
 
-    run_experiment("quick_sort", [](vector<int>& a) {
-        quick_sort(a, 0, a.size() - 1);
-    }, generate_reverse, "Reverse", sizes, out);
+        //library는 따로
+        else if (algo == "library_sort") {
+            int re_num = 0;
+            LibrarySort(arr, re_num);
+        }
+        else if (algo == "tim_sort") {
+            TimSort(arr);
+        } else if (algo == "cocktail_shaker_sort") {
+            cocktail_shaker_sort(arr);
+        } else if (algo == "comb_sort") {
+            CombSort(arr);
+        } else if (algo == "tournament_sort") {
+            TournamentSort(arr);
+        } else if (algo == "introsort") {
+            Introsort(arr);
+        }     
+        else {
+            cerr << "Unknown algorithm: " << algo << endl;
+            return;
+        }
+    };
 
-    run_experiment("quick_sort", [](vector<int>& a) {
-        quick_sort(a, 0, a.size() - 1);
-    }, generate_partial, "Partial", sizes, out);
+    // input generator 선택
+    vector<Element> (*data_gen)(int) = nullptr;
+    if (input_type == "sorted") data_gen = generate_sorted;
+    else if (input_type == "random") data_gen = generate_random;
+    else if (input_type == "reverse") data_gen = generate_reverse;
+    else if (input_type == "partial") data_gen = generate_partial;
+    else {
+        cerr << "Unknown input type: " << input_type << endl;
+        return 1;
+    }
 
+    run_experiment(algo, sort_func, data_gen, input_type, sizes, out);
     out.close();
     return 0;
 }
-
-// void quick_sort(vector<int>& arr, int low, int high);

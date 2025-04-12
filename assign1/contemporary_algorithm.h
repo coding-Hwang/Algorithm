@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void LibrarySort(vector<int>& arr);
+void LibrarySort(vector<int>& arr, int& re_num);
 void TimSort(vector<int>& arr);
 void cocktail_shaker_sort(vector<int>& arr);
 void CombSort(vector<int>& arr);

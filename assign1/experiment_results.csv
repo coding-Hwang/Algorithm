@@ -1,2 +1,0 @@
-Algorithm,InputType,Size,Time(ms),Trial1,Trial2,Trial3,Trial4,Trial5,Trial6,Trial7,Trial8,Trial9,Trial10,Stable
-quick_sort,Sorted,1000,4.26828,4.20703,3.93934,4.27806,4.10179,3.91897,4.35388,4.71854,5.12815,4.3208,3.71619,Yes
