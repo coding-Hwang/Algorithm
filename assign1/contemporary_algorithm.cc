@@ -6,15 +6,16 @@
 #include "convention_algorithm.h"
 
 using namespace std;
+using Element = pair<int, int>; // (key, id) for stability test
 
 /* 1. Library Sort */
 // 짝수 = gap
-void rebalance(vector<int>& S, int size) {
-    vector<int> newS(S.size(), -1); // S.size = 2*n
+void rebalance(vector<Element>& S, int size) {
+    vector<Element> newS(S.size(), {-1,-1}); // S.size = 2*n
     int j = 1; // 홀수 인덱스에만 원소 삽입
     int m = 0;
     for (size_t i = 0; i < S.size(); ++i) {
-        if (S[i] != -1) {
+        if (S[i].first != -1) {
             newS[j] = S[i];
             j += 2; // gap을 한 칸씩 확보
             m++;
@@ -25,12 +26,12 @@ void rebalance(vector<int>& S, int size) {
 }
 
 //binary search (gap 무시 ver)
-int BinarySearch(int key, const vector<int>& S, int length) {
+int BinarySearch(int key, const vector<Element>& S, int length) {
     int left = 0, right = length - 1;
     while (left <= right) {
         int mid = (left + right) / 2;
         // 값만 비교해야 하므로 gap은 skip
-        int val = S[mid * 2 + 1];  // mid * 2 + 1 = 홀수 인덱스
+        int val = S[mid * 2 + 1].first;  // mid * 2 + 1 = 홀수 인덱스
         if (val == -1 || val > key)
             right = mid - 1;
         else
@@ -39,10 +40,10 @@ int BinarySearch(int key, const vector<int>& S, int length) {
     return left;
 }
 
-void LibrarySort(vector<int>& arr, int& re_num) {
+void LibrarySort(vector<Element>& arr, int& re_num) {
     int n = arr.size();
     int size = 4; // 초기 배열 크기 (원소 + gap 포함)
-    vector<int> S(size, -1);
+    vector<Element> S(size, {-1,-1});
     S[1] = arr[0];
     int m = 1;
 
@@ -51,26 +52,26 @@ void LibrarySort(vector<int>& arr, int& re_num) {
         // gap이 없을 때 확장하는 개념이 아닌, 크기마다 확장하는 개념을 사용함으로써 log n 보장장
         if (m * 2 >= (int)S.size()) { // # of m : 1, 2, 4, 8 ... 마다 rebal
             size *= 2;
-            S.resize(size, -1);
+            S.resize(size, {-1,-1});
             rebalance(S, m);
             re_num++;
         }
 
-        int pos = BinarySearch(arr[i], S, m);
+        int pos = BinarySearch(arr[i].first, S, m);
         int idx = pos * 2 + 1; // 홀수 인덱스에 정렬된 값
 
         // 충돌 시 shift
-        if (S[idx] != -1) {
+        if (S[idx].first != -1) {
             // right shift to make gap
             int j = idx;
-            while (j < (int)S.size() && S[j] != -1) j += 2;
+            while (j < (int)S.size() && S[j].first != -1) j += 2;
             if (j >= (int)S.size()) {
                 // 공간 부족 시 rebalance + 확장
                 size *= 2;
-                S.resize(size, -1);
+                S.resize(size, {-1,-1});
                 rebalance(S, m);
                 re_num++;
-                pos = BinarySearch(arr[i], S, m);
+                pos = BinarySearch(arr[i].first, S, m);
                 idx = pos * 2 + 1;
             } else {
                 for (int k = j; k > idx; k -= 2) {
@@ -85,7 +86,7 @@ void LibrarySort(vector<int>& arr, int& re_num) {
 
     arr.clear();
     for (size_t i = 0; i < S.size(); ++i) {
-        if (S[i] != -1) {
+        if (S[i].first != -1) {
             arr.push_back(S[i]);
         }
     }
@@ -95,12 +96,12 @@ void LibrarySort(vector<int>& arr, int& re_num) {
 
 /* 2. Tim Sort */
 //  Insertion sort + merge sort (+ run)
-// void merge_sort(vector<int>& arr, int left, int right);
-// void insertion_sort(vector<int>& arr, int left, int right);
+// void merge_sort(vector<Element>& arr, int left, int right);
+// void insertion_sort(vector<Element>& arr, int left, int right);
 
 const int RUN = 32; // 기본 32로 잡음 (성능 주요 요소)
 
-void TimSort(vector<int>& arr) {
+void TimSort(vector<Element>& arr) {
     int n = arr.size();
 
     // 1. 각 run -> insertion sort
@@ -123,7 +124,7 @@ void TimSort(vector<int>& arr) {
 
 
 /* 3. Cocktail Shaker Sort */
-void cocktail_shaker_sort(vector<int>& arr){
+void cocktail_shaker_sort(vector<Element>& arr){
     bool swapped = true;
     int start = 0;
     int end = arr.size() - 1;
@@ -132,7 +133,7 @@ void cocktail_shaker_sort(vector<int>& arr){
         swapped = false;
         // 정방향 pass (큰거 뒤로로)
         for (int i = start; i < end; ++i){
-            if (arr[i] > arr[i+1]){
+            if (arr[i].first > arr[i+1].first){
                 swap(arr[i], arr[i+1]);
                 swapped = true;
             }
@@ -144,7 +145,7 @@ void cocktail_shaker_sort(vector<int>& arr){
 
         // 역방향 pass (작은거 앞으로)
         for (int i = end - 1; i >= start; --i){
-            if (arr[i] > arr[i+1]){
+            if (arr[i].first > arr[i+1].first){
                 swap(arr[i], arr[i+1]);
                 swapped = true;
             }
@@ -157,7 +158,7 @@ void cocktail_shaker_sort(vector<int>& arr){
 
 /* 4. Comb Sort */
 
-void CombSort(vector<int>& arr) {
+void CombSort(vector<Element>& arr) {
     int gap = arr.size();
     bool swapped = true;
     const double shrink = 1.3;
@@ -167,7 +168,7 @@ void CombSort(vector<int>& arr) {
         swapped = false;
 
         for (size_t i = 0; i + gap < arr.size(); ++i) {
-            if (arr[i] > arr[i + gap]) {
+            if (arr[i].first > arr[i + gap].first) {
                 swap(arr[i], arr[i + gap]);
                 swapped = true;
             }
@@ -186,46 +187,50 @@ void CombSort(vector<int>& arr) {
 // heap sort와의 차이 : heap은 전체 재배열 / tournament는 부분 재배열
 
 //일단 tree구현
-void buildTree(vector<int>& tree, const vector<int>& data, int leafStart){
+void buildTree(vector<Element>& tree, const vector<Element>& data, int leafStart){
     int n = data.size();
     for (int i = 0; i < n; ++i){
         tree[leafStart + i] = data[i];
     }
 
     for (size_t i = leafStart + n; i < tree.size(); ++i){
-        tree[i] = INT_MAX; // leaf가 아닌 노드는 INT_MAX로 초기화
+        tree[i] = {INT_MAX,INT_MAX}; // leaf가 아닌 노드는 INT_MAX로 초기화
     }
 
     for (int i = leafStart - 1; i >= 0; --i){
-        tree[i] = min(tree[2*i + 1], tree[2*i + 2]); // 부모 노드에 자식 노드의 최소값 저장
+        if (tree[2*i + 1].first < tree[2*i + 2].first) tree[i] = tree[2*i + 1];
+        else tree[i] = tree[2*i + 2];
     }
 }
 
-void updateTree(vector<int>& tree, int index){
-    tree[index] = INT_MAX; // 해당 노드 삭제
+void updateTree(vector<Element>& tree, int index){
+    tree[index] = {INT_MAX, INT_MAX}; // 해당 노드 삭제
 
     while (index > 0){
         int parent = (index - 1) / 2;
         int left = 2 * parent + 1;
         int right = 2 * parent + 2;
-        tree[parent] = min(tree[left], tree[right]); // 부모 노드에 자식 노드의 최소값 저장
+        if (tree[left].first < tree[right].first) tree[parent] = tree[left];
+        else
+            tree[parent] = tree[right];
+        // 부모 노드에 자식 노드의 최소값 저장
         index = parent;
     }
 }
 
-void TournamentSort(vector<int>& data){
+void TournamentSort(vector<Element>& data){
     int n = data.size();
     int leafCount = pow(2, ceil(log2(n))); // leaf 노드 개수 (n = 리프 개수)
     int treeSize = 2 * leafCount - 1; // 전체 노드 개수 -> 공간을 좀 많이 차지
     int leafStart = treeSize/2;
 
-    vector<int> tree(treeSize, INT_MAX); // 트리 초기화
-    vector<int> result;
+    vector<Element> tree(treeSize, {INT_MAX,INT_MAX}); // 트리 초기화
+    vector<Element> result;
 
     buildTree(tree, data, leafStart); // 트리 생성
 
     for (int i = 0; i < n; ++i){
-        int minVal = tree[0];
+        Element minVal = tree[0];
         result.push_back(minVal); // 최솟값 계속 넣기 -> n번번
 
         for (int j = 0; j < leafCount; ++j){ 
@@ -247,7 +252,7 @@ void TournamentSort(vector<int>& data){
 
 const int INSERTION_THRESHOLD = 16;
 
-void introsort_util(vector<int>& arr, int begin, int end, int depthLimit){
+void introsort_util(vector<Element>& arr, int begin, int end, int depthLimit){
     int size = end - begin +1;
     
     if(size < INSERTION_THRESHOLD){
@@ -265,7 +270,7 @@ void introsort_util(vector<int>& arr, int begin, int end, int depthLimit){
     introsort_util(arr, pivot + 1, end, depthLimit - 1);
 }
 
-void Introsort(vector<int>& arr){
+void Introsort(vector<Element>& arr){
     int depthLimit = log2(arr.size()) * 2; // 깊이 제한
     introsort_util(arr, 0, arr.size() - 1, depthLimit);
 }
@@ -275,7 +280,7 @@ void Introsort(vector<int>& arr){
 /* for test */
 
 // int main() {
-//     vector<int> arr = {1, 6, 74, 3, 46, 252, 416, 7, 198, 329};
+//     vector<Element> arr = {1, 6, 74, 3, 46, 252, 416, 7, 198, 329};
 
 //     cout << "Original: ";
 //     for (int n : arr) cout << n << " ";

@@ -25,19 +25,21 @@ long get_memory_usage_kb() {
 }
 
 // Sorting algorithm declarations
-void merge_sort(vector<int>& arr, int left, int right);
-void heap_sort(vector<int>& arr);
-void bubble_sort(vector<int>& arr);
-void insertion_sort(vector<int>& arr, int left, int right);
-void selection_sort(vector<int>& arr);
-void quick_sort(vector<int>& arr, int low, int high);
 
-void LibrarySort(vector<int>& arr, int& re_num);
-void TimSort(vector<int>& arr);
-void cocktail_shaker_sort(vector<int>& arr);
-void CombSort(vector<int>& arr);
-void TournamentSort(vector<int>& data);
-void Introsort(vector<int>& arr);
+int partition(vector<Element>& arr, int low, int high);
+void merge_sort(vector<Element>& arr, int left, int right); 
+void heap_sort(vector<Element>& arr);
+void bubble_sort(vector<Element>& arr);
+void insertion_sort(vector<Element>& arr, int left, int right);
+void selection_sort(vector<Element>& arr);
+void quick_sort(vector<Element>& arr, int low, int high);
+
+void LibrarySort(vector<Element>& arr, int& re_num);
+void TimSort(vector<Element>& arr);
+void cocktail_shaker_sort(vector<Element>& arr);
+void CombSort(vector<Element>& arr);
+void TournamentSort(vector<Element>& data);
+void Introsort(vector<Element>& arr);
 
 // Data generation functions
 vector<Element> generate_sorted(int size) {
@@ -90,7 +92,7 @@ bool is_sorted(const vector<Element>& data) {
 }
 
 // Experiment runner
-void run_experiment(const string& name, function<void(vector<int>&)> sort_func, //void(*sort_func)(vector<int>&),
+void run_experiment(const string& name, function<void(vector<Element>&)> sort_func, //void(*sort_func)(vector<int>&),
                     vector<Element> (*data_gen)(int),
                     const string& input_type, const vector<int>& sizes, ofstream& out) {
     for (int size : sizes) {
@@ -105,14 +107,16 @@ void run_experiment(const string& name, function<void(vector<int>&)> sort_func, 
             vector<Element> data = data_gen(size);
             vector<Element> original = data;
 
-            vector<int> raw_data(size);
-            for (int i = 0; i < size; ++i)
-                raw_data[i] = data[i].first;
+            vector<Element> raw_data(size);
+            raw_data=data;
 
             auto start = high_resolution_clock::now();
             sort_func(raw_data);
             auto end = high_resolution_clock::now();
-
+            if (!is_sorted(raw_data)) {
+                cerr << "Error: Data is not sorted correctly!" << endl;
+                return;
+            }
             long mem_after = get_memory_usage_kb();
             memory_usages.push_back(mem_after);
 
@@ -121,19 +125,7 @@ void run_experiment(const string& name, function<void(vector<int>&)> sort_func, 
             cout << "  - Trial " << t + 1 << ": time = " << elapsed << " ms, memory = " << mem_after << " KB" << endl;
             total_time += elapsed;
 
-            unordered_map<int, queue<int>> key_to_ids;
-            for (auto& [key, id] : original)
-                key_to_ids[key].push(id);
-
-            vector<Element> after(size);
-            for (int i = 0; i < size; ++i) {
-                int key = raw_data[i];
-                int id = key_to_ids[key].front();
-                key_to_ids[key].pop();
-                after[i] = {key, id};
-            }
-
-            stable &= is_stable(original, after);
+            stable &= is_stable(original, raw_data);
         }
 
         // 평균 메모리 사용량 계산
@@ -178,7 +170,7 @@ int main(int argc, char* argv[]) {
     }
 
     // sort function 선택
-    auto sort_func = [&](vector<int>& arr) {
+    auto sort_func = [&](vector<Element>& arr) {
         if (algo == "merge_sort") {
             merge_sort(arr, 0, arr.size() - 1);
         } else if (algo == "quick_sort") {

@@ -7,12 +7,13 @@
 #include "convention_algorithm.h"
 
 using namespace std;
+using Element = pair<int, int>; // (key, id) for stability test
 
-void LibrarySort(vector<int>& arr, int& re_num);
-void TimSort(vector<int>& arr);
-void cocktail_shaker_sort(vector<int>& arr);
-void CombSort(vector<int>& arr);
-void TournamentSort(vector<int>& data);
-void Introsort(vector<int>& arr);
+void LibrarySort(vector<Element>& arr, int& re_num);
+void TimSort(vector<Element>& arr);
+void cocktail_shaker_sort(vector<Element>& arr);
+void CombSort(vector<Element>& arr);
+void TournamentSort(vector<Element>& data);
+void Introsort(vector<Element>& arr);
 
 #endif

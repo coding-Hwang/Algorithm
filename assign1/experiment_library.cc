@@ -63,6 +63,14 @@ bool is_stable(const vector<Element>& before, const vector<Element>& after) {
     return bmap == amap;
 }
 
+// Sorting correctness checker
+bool is_sorted(const vector<Element>& data) {
+    for (size_t i = 1; i < data.size(); ++i)
+        if (data[i - 1].first > data[i].first)
+            return false;
+    return true;
+}
+
 void run_library_experiment(vector<Element> (*data_gen)(int),
                             const string& input_type,
                             const vector<int>& sizes,
@@ -78,15 +86,18 @@ void run_library_experiment(vector<Element> (*data_gen)(int),
         for (int t = 0; t < 10; ++t) {
             vector<Element> data = data_gen(size);
             vector<Element> original = data;
-            vector<int> raw_data(size);
-            for (int i = 0; i < size; ++i)
-                raw_data[i] = data[i].first;
+            vector<Element> raw_data(size);
+            raw_data=data;
 
             int re_num = 0;
             auto start = high_resolution_clock::now();
             LibrarySort(raw_data, re_num);
             auto end = high_resolution_clock::now();
 
+            if (!is_sorted(raw_data)) {
+                cerr << "Error: Data is not sorted correctly!" << endl;
+                return;
+            }
             if (t == 9)
                 memory = get_memory_usage_kb();
 
@@ -94,19 +105,7 @@ void run_library_experiment(vector<Element> (*data_gen)(int),
             double elapsed = duration<double, milli>(end - start).count();
             trial_times.push_back(elapsed);
 
-            unordered_map<int, queue<int>> key_to_ids;
-            for (auto& [key, id] : original)
-                key_to_ids[key].push(id);
-
-            vector<Element> after(size);
-            for (int i = 0; i < size; ++i) {
-                int key = raw_data[i];
-                int id = key_to_ids[key].front();
-                key_to_ids[key].pop();
-                after[i] = {key, id};
-            }
-
-            stable &= is_stable(original, after);
+            stable &= is_stable(original, raw_data);
 
             cout << "  - Trial " << t + 1 << ": time = " << elapsed << " ms, rebalance = " << re_num << endl;
         }
