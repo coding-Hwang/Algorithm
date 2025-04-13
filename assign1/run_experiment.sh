@@ -3,9 +3,8 @@
 # ALGORITHMS=("merge_sort" "heap_sort" "bubble_sort" "insertion_sort" "quick_sort" "selection_sort" "tim_sort" "cocktail_shaker_sort"
 #   "comb_sort" "tournament_sort" "introsort") 
 
-ALGORITHMS=("bubble_sort") 
-# INPUTS=("sorted" "random" "reverse" "partial")
-INPUTS=("random")
+ALGORITHMS=("introsort")
+INPUTS=("sorted" "random" "reverse" "partial")
 
 for algo in "${ALGORITHMS[@]}"; do
     for input in "${INPUTS[@]}"; do

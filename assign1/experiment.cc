@@ -39,6 +39,7 @@ void TimSort(vector<Element>& arr);
 void cocktail_shaker_sort(vector<Element>& arr);
 void CombSort(vector<Element>& arr);
 void TournamentSort(vector<Element>& data);
+void TournamentSort2(vector<Element>& data);
 void Introsort(vector<Element>& arr);
 
 // Data generation functions

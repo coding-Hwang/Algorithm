@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <climits> // for INT_MAX
+#include <unordered_map> // for TournamentSort2
 #include "convention_algorithm.h"
 
 using namespace std;
@@ -183,68 +184,65 @@ void CombSort(vector<Element>& arr) {
 // min heap
 // 최솟값을 차례로 추출하며 정렬
 // O(n log n)
+/////////////////////////////
+// Use this implementation //
+/////////////////////////////
 
-// heap sort와의 차이 : heap은 전체 재배열 / tournament는 부분 재배열
+struct TreeNode {
+    Element val;
+    int leafIndex; // 해당 값이 어느 리프에서 왔는지 추적
+};
 
-//일단 tree구현
-void buildTree(vector<Element>& tree, const vector<Element>& data, int leafStart){
+void buildTree(vector<TreeNode>& tree, const vector<Element>& data, int leafStart) {
     int n = data.size();
-    for (int i = 0; i < n; ++i){
-        tree[leafStart + i] = data[i];
+    for (int i = 0; i < n; ++i) {
+        tree[leafStart + i] = {data[i], leafStart + i};
+    } // index도 설정정
+
+    for (int i = leafStart + n; i < (int)tree.size(); ++i) {
+        tree[i] = {{INT_MAX, INT_MAX}, i};
     }
 
-    for (size_t i = leafStart + n; i < tree.size(); ++i){
-        tree[i] = {INT_MAX,INT_MAX}; // leaf가 아닌 노드는 INT_MAX로 초기화
-    }
-
-    for (int i = leafStart - 1; i >= 0; --i){
-        if (tree[2*i + 1].first < tree[2*i + 2].first) tree[i] = tree[2*i + 1];
-        else tree[i] = tree[2*i + 2];
+    for (int i = leafStart - 1; i >= 0; --i) {
+        TreeNode left = tree[2 * i + 1];
+        TreeNode right = tree[2 * i + 2];
+        tree[i] = (left.val.first < right.val.first) ? left : right;
     }
 }
 
-void updateTree(vector<Element>& tree, int index){
-    tree[index] = {INT_MAX, INT_MAX}; // 해당 노드 삭제
+void updateTree(vector<TreeNode>& tree, int index) {
+    tree[index] = {{INT_MAX, INT_MAX}, index}; // 삭제
 
-    while (index > 0){
+    while (index > 0) {
         int parent = (index - 1) / 2;
         int left = 2 * parent + 1;
         int right = 2 * parent + 2;
-        if (tree[left].first < tree[right].first) tree[parent] = tree[left];
-        else
-            tree[parent] = tree[right];
-        // 부모 노드에 자식 노드의 최소값 저장
+        TreeNode leftNode = tree[left];
+        TreeNode rightNode = tree[right];
+        tree[parent] = (leftNode.val.first < rightNode.val.first) ? leftNode : rightNode;
         index = parent;
     }
 }
 
-void TournamentSort(vector<Element>& data){
+void TournamentSort(vector<Element>& data) {
     int n = data.size();
-    int leafCount = pow(2, ceil(log2(n))); // leaf 노드 개수 (n = 리프 개수)
-    int treeSize = 2 * leafCount - 1; // 전체 노드 개수 -> 공간을 좀 많이 차지
-    int leafStart = treeSize/2;
+    int leafCount = pow(2, ceil(log2(n)));
+    int treeSize = 2 * leafCount - 1;
+    int leafStart = treeSize / 2;
 
-    vector<Element> tree(treeSize, {INT_MAX,INT_MAX}); // 트리 초기화
+    vector<TreeNode> tree(treeSize, {{INT_MAX, INT_MAX}, -1});
     vector<Element> result;
 
-    buildTree(tree, data, leafStart); // 트리 생성
+    buildTree(tree, data, leafStart);
 
-    for (int i = 0; i < n; ++i){
-        Element minVal = tree[0];
-        result.push_back(minVal); // 최솟값 계속 넣기 -> n번번
-
-        for (int j = 0; j < leafCount; ++j){ 
-            if (tree[leafStart + j] == minVal){
-                updateTree(tree, leafStart + j); // O(log n), 해당 리프 노드 삭제
-                break;
-            } // leaf에서 해당 값 찾아 INF로 교체
-        }
+    for (int i = 0; i < n; ++i) {
+        TreeNode minNode = tree[0];
+        result.push_back(minNode.val);
+        updateTree(tree, minNode.leafIndex); // 바로 갱신
     }
-    data = result; // 정렬된 결과를 원래 배열에 저장    
+
+    data = result;
 }
-
-//updateTree에서의 for문 -> 삭제 요소의 인덱스를 바로 알 수 없어서 시간 늘어남 (map 이용해서 공간 복잡도와 trade off 하는 방식 존재) 
-
 
 
 /* 6. Introsort*/
@@ -279,28 +277,25 @@ void Introsort(vector<Element>& arr){
 
 /* for test */
 
+// void printData(const vector<Element>& data, const string& label) {
+//     cout << label << ":\n";
+//     for (const auto& e : data) {
+//         cout << "(" << e.first << ", " << e.second << ") ";
+//     }
+//     cout << "\n\n";
+// }
+
 // int main() {
-//     vector<Element> arr = {1, 6, 74, 3, 46, 252, 416, 7, 198, 329};
+//     //테스트용 입력 데이터 (원하는 대로 바꿔도 됨)
+//     vector<Element> data = {
+//         {5, 1}, {3, 2}, {8, 3}, {1, 4}, {4, 5}
+//     };
 
-//     cout << "Original: ";
-//     for (int n : arr) cout << n << " ";
-//     cout << "\n";
+//     printData(data, "Before Sort");
 
-//     int renum = 0;
-//     LibrarySort(arr, renum); // 문제 있음
-//     // TimSort(arr);
-//     // cocktail_shaker_sort(arr);
-//     // CombSort(arr);
-//     // TournamentSort(arr);
-//     // Introsort(arr);
+//     TournamentSort(data); //너의 정렬 함수 호출
 
-
-//     cout << "Sorted:   ";
-//     for (int n : arr) cout << n << " ";
-//     cout << "\n";
-
-//     cout << "Rebalance count: " << renum << endl;
-//     cout << "Array size: " << arr.size() << endl;
+//     printData(data, "After Sort");
 
 //     return 0;
 // }
