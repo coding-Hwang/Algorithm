@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# ALGORITHMS=("merge_sort" "heap_sort" "bubble_sort" "insertion_sort" "quick_sort" "selection_sort" "tim_sort" "cocktail_shaker_sort"
+# ALGORITHMS=("merge_sort" "heap_sort" "bubble_sort" "insertion_sort" "quick_sort" "selection_sort" "tim_sort" "cocktail_shaker_sort" "library_sort"
 #   "comb_sort" "tournament_sort" "introsort") 
+ALGORITHMS=("bubble_sort" "insertion_sort" "quick_sort" "selection_sort" "tim_sort" "cocktail_shaker_sort" "library_sort"
+  "comb_sort" "tournament_sort" "introsort") 
 
-ALGORITHMS=("introsort")
 INPUTS=("sorted" "random" "reverse" "partial")
 
 for algo in "${ALGORITHMS[@]}"; do

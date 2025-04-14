@@ -122,7 +122,7 @@ void run_library_experiment(vector<Element> (*data_gen)(int),
              << " | time(avg)=" << avg_time << " ms"
              << ", rebalance(avg)=" << avg_rebalance
              << ", stable=" << (stable ? "Yes" : "No")
-             << ", memory=" << memory << " KB" << endl;
+             << ", memory=" << memory << " B" << endl;
     }
 }
 
@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
     check.close();
 
     if (!file_exists) {
-        out << "Algorithm,InputType,Size,Memory(KB),Time(ms)";
+        out << "Algorithm,InputType,Size,Memory(B),Time(ms)";
         for (int i = 1; i <= 10; ++i)
             out << ",Trial" << i;
         out << ",rebalance,Stable\n";
