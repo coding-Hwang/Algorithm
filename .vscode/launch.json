@@ -1,0 +1,23 @@
+// .vscode/tasks.json
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "build",
+        "type": "shell",
+        "command": "g++",
+        "args": [
+          "-g", 
+          "contemporary_algorithm.cc", 
+          "convention_algorithm.cc",
+          "-o", 
+          "test"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      }
+    ]
+  }
+  
