@@ -1,4 +1,4 @@
-# Assignment1 Folder Guide
+# Assignment1
 
 All about Assignment1 files is in the `assign1` folder.
 
