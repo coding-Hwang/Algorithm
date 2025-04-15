@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+merge_sort,sorted,1000000,6752,1005.34,1005.34,Yes
+merge_sort,random,1000000,6752,1173.53,1173.53,Yes
+merge_sort,reverse,1000000,6752,1009.38,1009.38,Yes
+merge_sort,partial,1000000,6752,1062.88,1062.88,Yes

@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+library_sort,sorted,1000000,4176,285.472,285.472,Yes
+library_sort,random,1000000,4176,1.90836e+06,1.90836e+06,Yes
+library_sort,reverse,1000000,4176,3.348863e+06,3.348863e+06,Yes
+library_sort,partial,1000000,4176,1.221788e+06,1.221788e+06,Yes

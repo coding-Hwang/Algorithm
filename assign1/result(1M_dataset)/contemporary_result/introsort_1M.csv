@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+introsort,sorted,1000000,0,1945.89,1945.89,Yes
+introsort,random,1000000,0,13814.2,13814.2,No
+introsort,reverse,1000000,0,1381.22,1381.22,Yes
+introsort,partial,1000000,0,6603.16,6603.16,No

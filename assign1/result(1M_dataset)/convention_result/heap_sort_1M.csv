@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+heap_sort,sorted,1000000,0,496.022,496.022,Yes
+heap_sort,random,1000000,0,667.118,667.118,No
+heap_sort,reverse,1000000,0,459.635,459.635,Yes
+heap_sort,partial,1000000,0,631.559,631.559,No

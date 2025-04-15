@@ -1,0 +1,4 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+quick_sort,partial,1000000,0,532.249,532.249,No
+quick_sort,random,1000000,0,580.801,580.801,No
+quick_sort,reverse,1000000,0,7.063570e+06,7.063570e+06,Yes

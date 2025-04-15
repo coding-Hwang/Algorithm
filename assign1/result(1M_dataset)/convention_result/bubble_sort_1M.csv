@@ -1,0 +1,4 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+bubble_sort,sorted,1000000,0,3.02796,3.02796,Yes
+bubble_sort,random,1000000,0,6.52693e+06,6.52693e+06,Yes
+bubble_sort,partial,1000000,0,5.135621e+06,5.135621e+06,Yes

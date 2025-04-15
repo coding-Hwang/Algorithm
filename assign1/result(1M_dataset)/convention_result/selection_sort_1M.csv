@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+selection_sort,sorted,1000000,0,2.13394e+06,2.13394e+06,Yes
+selection_sort,random,1000000,0,2.11041e+06,2.11041e+06,No
+selection_sort,reverse,1000000,0,2.13214e+06,2.13214e+06,Yes
+selection_sort,partial,1000000,0,2.09533e+06,2.09533e+06,No

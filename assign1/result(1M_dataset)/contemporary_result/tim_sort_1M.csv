@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+tim_sort,sorted,1000000,27136,19913.2,19913.2,Yes
+tim_sort,random,1000000,27136,16733.3,16733.3,Yes
+tim_sort,reverse,1000000,27136,19145.3,19145.3,Yes
+tim_sort,partial,1000000,27136,15711.4,15711.4,Yes

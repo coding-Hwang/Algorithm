@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+tournament_sort,sorted,1000000,2176,488.726,488.726,Yes
+tournament_sort,random,1000000,2176,1059.22,1059.22,No
+tournament_sort,reverse,1000000,2176,571.551,571.551,Yes
+tournament_sort,partial,1000000,2176,597.616,597.616,No

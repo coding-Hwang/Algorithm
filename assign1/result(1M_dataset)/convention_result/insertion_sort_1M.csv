@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+insertion_sort,sorted,1000000,0,9.61507,9.61507,Yes
+insertion_sort,random,1000000,0,2.09775e+06,2.09775e+06,Yes
+insertion_sort,reverse,1000000,0,5.269277e+06,5.269277e+06,Yes
+insertion_sort,partial,1000000,0,1.082631e+06,1.082631e+06,Yes

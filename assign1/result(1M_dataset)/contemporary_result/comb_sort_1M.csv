@@ -1,0 +1,5 @@
+Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable
+comb_sort,sorted,1000000,0,329.312,329.312,Yes
+comb_sort,random,1000000,0,668.017,668.017,No
+comb_sort,reverse,1000000,0,376.038,376.038,Yes
+comb_sort,partial,1000000,0,782.34,782.34,No
