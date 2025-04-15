@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
     string algo = argv[1];
     string input_type = argv[2];
 
-    vector<int> sizes = {1000000};  // 🔸 1M만 측정
+    vector<int> sizes = {1000000};  //1M만 측정
     string filename = algo + "_1M.csv";
 
     ifstream check(filename);
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
 
     ofstream out(filename, ios::app);
     if (!file_exists) {
-        out << "Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable\n";  // 🔸 Trial1만 출력
+        out << "Algorithm,InputType,Size,Memory(B),Time(ms),Trial1,Stable\n";  //Trial1만 출력
     }
 
     // sort function 선택
